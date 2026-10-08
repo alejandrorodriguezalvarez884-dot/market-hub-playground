@@ -7,6 +7,7 @@ const site = (v: string | undefined, fallback: string) => (v ?? fallback).replac
 export const HUB_URL = site(import.meta.env.PUBLIC_HUB_URL, "https://themarkethub.app");
 export const RADAR_URL = site(import.meta.env.PUBLIC_RADAR_URL, "https://radar.themarkethub.app");
 export const FUNDAMENTALS_URL = site(import.meta.env.PUBLIC_FUNDAMENTALS_URL, "https://fundamentals.themarkethub.app");
+export const PEERS_URL = site(import.meta.env.PUBLIC_PEERS_URL, "https://peers.themarkethub.app");
 export const hubQuoteUrl = (ticker: string) => `${HUB_URL}/quote/?t=${encodeURIComponent(ticker)}`;
 
 // Every internal link goes through here, so the site works under a sub-path too.

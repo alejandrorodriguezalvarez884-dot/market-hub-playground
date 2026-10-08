@@ -3,7 +3,7 @@
 // there: it carries the same navigation as the portal's own private pages (App.astro in
 // market-hub-landing; a copy of the HubNav.astro of fundamentals-lab, with Playground marked).
 // `part` is the sidebar of a wide screen or the bar of a narrow one.
-import { FUNDAMENTALS_URL, HUB_URL, RADAR_URL, link } from "../lib/site";
+import { FUNDAMENTALS_URL, HUB_URL, PEERS_URL, RADAR_URL, link } from "../lib/site";
 
 interface Props {
 	part: "side" | "top";
@@ -20,6 +20,7 @@ const icons: Record<string, string> = {
 	account: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0",
 	markets: "M3 17l6-6 4 4 8-8M15 7h6v6",
 	earnings: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7",
+	peers: "M4 7a2 2 0 1 0 4 0 2 2 0 1 0-4 0M16 6a2 2 0 1 0 4 0 2 2 0 1 0-4 0M11 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0M8 6.8l8-.6M7 8.7l5 7.6M17.2 7.8l-3.3 8.4",
 	news: "M4 5h13v14H6a2 2 0 0 1-2-2V5Zm13 4h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5",
 	opinion: "M4 5h16v11H9l-5 4V5Zm4 4h8M8 12h5",
 	media: "M3 6h18v12H3zM10 9.5v5l4.5-2.5-4.5-2.5Z",
@@ -37,6 +38,7 @@ const groups = [
 	{ label: "Tools", links: [
 		{ href: `${FUNDAMENTALS_URL}/`, label: "Fundamentals", icon: "tools" },
 		{ href: `${RADAR_URL}/`, label: "Earnings", icon: "earnings" },
+		{ href: `${PEERS_URL}/`, label: "Peers", icon: "peers" },
 		{ href: link("/"), label: "Playground", icon: "playground", active: true },
 	] },
 	{ label: "Explore", links: [
