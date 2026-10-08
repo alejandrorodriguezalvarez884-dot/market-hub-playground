@@ -34,8 +34,31 @@ Decisiones del agente, avisadas al usuario y a revisar si quiere otras:
 
 ## Dónde estamos
 
-**Prototipo local hecho y probado (2026-10-08). Sin desplegar. Sin probar con el modelo de
-verdad** (no se ha hecho ninguna llamada a Claude: hace falta el permiso del usuario).
+**Prototipo local hecho y probado (2026-10-08), también con el modelo de verdad. Sin desplegar.**
+
+- **Probado con Claude Opus 5.5 de verdad** (2026-10-08, con permiso del usuario; la clave se leyó
+  de Secret Manager, secreto `ANTHROPIC_API_KEY`, solo en memoria: los `.env` de este equipo la
+  tienen vacía). Once turnos llamando a `Composer.turn` desde un script, encadenados sobre el
+  mismo tablero, **0,07 USD en total**:
+  - El esquema de la salida se acepta y las instrucciones se leen de la caché desde el segundo
+    turno (2.948 tokens). Con caché, **cada turno cuesta entre 0,4 y 0,8 céntimos** (unos 70 a 600
+    tokens de entrada sin caché y de 40 a 210 de salida) y **tarda entre 2,4 y 4,3 s**; uno tardó
+    11,9 s. El primero tras cinco minutos sin uso paga la escritura de la caché: 1,7 céntimos. El
+    log estima el coste algo por encima (cuenta la lectura de caché a un décimo del precio de
+    entrada y la de Opus 5.5 es la mitad de eso).
+  - Compuso bien las diez peticiones: "Chart Nvidia over two years with its 50 and 200-day
+    averages" (precio, 2Y, medias), "Compare Apple, Microsoft and Alphabet this year" (YTD), "The
+    eleven US sectors on one scale, over one month" (los once fondos SPDR), "A table of the big
+    banks with returns, volatility and P/E" (diez bancos, siete columnas, ancho completo), "make
+    the nvidia chart a line and five years" (un `update` del widget correcto), una en español con
+    dos operaciones ("pon las Siete Magníficas en una tabla con capitalización y PER, y quita la de
+    los bancos"), y "move the sectors to the top, make it large and call it Sectors this month".
+  - Declinó lo que debe: a "What should I buy right now?" contestó "This board shows figures and
+    does not advise." sin tocar el tablero; a los ingresos y márgenes de Tesla, que no están
+    disponibles y añadió su gráfico de precio como lo más cercano; a "what's the weather in
+    Madrid?", que es un tablero de mercado. Ninguna frase llevó cifras ni consejos.
+  - **Sin probar**: el modelo de verdad a través del navegador (el chat de la página se probó con
+    el compositor de pega; el camino del servicio es el mismo) y una conversación larga.
 
 - **Qué hace**: una página con el tablero y, al lado (debajo en pantallas estrechas), el chat. El
   usuario escribe lo que quiere ver; el servicio pasa al modelo el tablero, los últimos turnos y la
@@ -102,10 +125,8 @@ verdad** (no se ha hecho ninguna llamada a Claude: hace falta el permiso del usu
 
 ## Siguientes pasos, en orden
 
-1. **Probar con el modelo de verdad**, con permiso del usuario: unas cuantas peticiones en
-   lenguaje natural, mirar que el esquema se acepta, qué compone, cuánto tarda y cuánto cuesta
-   cada turno (estimado sin medir: entre 1 y 3 céntimos con Opus 5.5). Probar también que
-   declina un consejo y una petición fuera del catálogo.
+1. ~~Probar con el modelo de verdad~~ (hecho: ver arriba). Falta que el usuario lo use en el
+   navegador con el modelo: `ANTHROPIC_API_KEY` en un `.env` de este repo y `make serve`.
 2. Que el usuario lo vea y decida qué falta en el catálogo (más tipos de widget, fundamentales,
    noticias) y si el tablero debe guardarse (`localStorage`, como la Watchlist del portal).
 3. Para desplegar, como las otras tools: `Dockerfile`, `scripts/deploy-cloudrun.sh`, el secreto
