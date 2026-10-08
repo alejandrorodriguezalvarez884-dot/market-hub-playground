@@ -129,8 +129,20 @@ Decisiones del agente, avisadas al usuario y a revisar si quiere otras:
    navegador con el modelo: `ANTHROPIC_API_KEY` en un `.env` de este repo y `make serve`.
 2. Que el usuario lo vea y decida qué falta en el catálogo (más tipos de widget, fundamentales,
    noticias) y si el tablero debe guardarse (`localStorage`, como la Watchlist del portal).
-3. Para desplegar, como las otras tools: `Dockerfile`, `scripts/deploy-cloudrun.sh`, el secreto
-   de la clave, el subdominio y su mapeo, el enlace "Playground" en `App.astro` del portal y en
-   los `HubNav.astro` de `fundamentals-lab` y `decision-signal-lab`, y **decir en `/privacy/`
-   del portal que lo que se escribe en el chat va a Anthropic** antes de abrirlo.
+3. **Desplegar** (pedido por el usuario el 2026-10-08 para probarlo; **preparado y sin lanzar**: el
+   agente no pudo ejecutar el despliegue desde su sesión). `make deploy`
+   (`scripts/deploy-cloudrun.sh`) crea el servicio `market-hub-playground` en `europe-west1`
+   (1 Gi, hasta 2 instancias, 60 s por petición). No escribe ningún secreto: apunta el servicio a
+   `ANTHROPIC_API_KEY` y a `market-hub-session-secret`, que ya están en Secret Manager, y se niega
+   a desplegar sin `HUB_URL` (sin login, cualquiera gastaría la clave, que no tiene tope). El
+   `.env` local solo lleva `HUB_URL` y `ANTHROPIC_SECRET`, ninguna clave. Después:
+   - mapear el subdominio: `gcloud beta run domain-mappings create --service market-hub-playground
+     --domain playground.themarkethub.app --region europe-west1`, y en Cloudflare un CNAME
+     `playground` a `ghs.googlehosted.com`, solo DNS. **Sin el subdominio no se puede entrar**: la
+     cookie de sesión del portal solo llega a `*.themarkethub.app`, y en la dirección `*.run.app`
+     el servicio manda una y otra vez a iniciar sesión;
+   - el enlace "Playground" en `App.astro` del portal y en los `HubNav.astro` de
+     `fundamentals-lab` y `decision-signal-lab`;
+   - **decir en `/privacy/` del portal que lo que se escribe en el chat va a Anthropic**, antes de
+     enlazarlo desde My Hub.
 4. Registrar el repo como submódulo del workspace `market-hub` y añadirlo a su `CLAUDE.md`.
