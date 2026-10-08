@@ -34,7 +34,33 @@ Decisiones del agente, avisadas al usuario y a revisar si quiere otras:
 
 ## Dónde estamos
 
-**Prototipo local hecho y probado (2026-10-08), también con el modelo de verdad. Sin desplegar.**
+**Hecho, probado con el modelo de verdad y desplegado (2026-10-08).**
+
+- **Desplegado el 2026-10-08 a petición del usuario, para probarlo**: servicio
+  `market-hub-playground` en `europe-west1`, revisión `market-hub-playground-00001-gx9` (commit
+  `9780aac`: sin el enlace "Peers" de la barra, que entró después), 1 Gi, hasta 2 instancias, 60 s
+  por petición, https://market-hub-playground-3qwezbjyfq-ew.a.run.app. Detrás del login de Market
+  Hub (`HUB_URL` y el secreto `market-hub-session-secret`), con la clave del secreto
+  `ANTHROPIC_API_KEY` y **sin tope de gasto**. `make deploy` no escribe ningún secreto y se niega
+  a desplegar sin `HUB_URL`; el `.env` local solo lleva `HUB_URL` y `ANTHROPIC_SECRET`.
+  - **Subdominio**: mapeo `playground.themarkethub.app` creado en Cloud Run y, en Cloudflare, el
+    CNAME `playground` a `ghs.googlehosted.com`, solo DNS (lo añadió el agente en el navegador del
+    usuario, con su sesión y su permiso). Resuelve desde fuera. **El certificado de Google seguía
+    pendiente veinte minutos después**: hasta que se emita, https://playground.themarkethub.app no
+    abre. Se mira con `gcloud beta run domain-mappings describe --domain
+    playground.themarkethub.app --region europe-west1`.
+  - **Por la dirección `*.run.app` no se puede entrar**: la cookie de sesión del portal solo llega
+    a `*.themarkethub.app`, y ahí el servicio manda una y otra vez a iniciar sesión.
+  - **Comprobado tras desplegar** (por `*.run.app`, sin sesión): `/api/health` responde, la página
+    manda a `https://themarkethub.app/signin/?next=…` y `/api/catalog` da 401 con la dirección de
+    entrada.
+  - **Enlazado desde My Hub** ("Tools" de la barra lateral): portal `market-hub-00031-lrs`,
+    Fundamentals Lab `fundamentals-lab-00015-x65` y el radar del hub `earnings-radar-hub-00010-c64`,
+    los tres desplegados desde una copia limpia de su commit y con su configuración idéntica a la
+    de antes. **`/privacy/` del portal ya dice** que lo que se escribe en el chat va al modelo de
+    Anthropic con el tablero y los últimos mensajes, y que no se guarda.
+  - **Sin probar**: entrar con una sesión real por el subdominio y un turno de chat en producción
+    (hace falta el certificado, y el agente no puede iniciar sesión).
 
 - **Probado con Claude Opus 5.5 de verdad** (2026-10-08, con permiso del usuario; la clave se leyó
   de Secret Manager, secreto `ANTHROPIC_API_KEY`, solo en memoria: los `.env` de este equipo la
@@ -125,24 +151,10 @@ Decisiones del agente, avisadas al usuario y a revisar si quiere otras:
 
 ## Siguientes pasos, en orden
 
-1. ~~Probar con el modelo de verdad~~ (hecho: ver arriba). Falta que el usuario lo use en el
-   navegador con el modelo: `ANTHROPIC_API_KEY` en un `.env` de este repo y `make serve`.
+1. ~~Probar con el modelo de verdad~~ (hecho: ver arriba).
 2. Que el usuario lo vea y decida qué falta en el catálogo (más tipos de widget, fundamentales,
    noticias) y si el tablero debe guardarse (`localStorage`, como la Watchlist del portal).
-3. **Desplegar** (pedido por el usuario el 2026-10-08 para probarlo; **preparado y sin lanzar**: el
-   agente no pudo ejecutar el despliegue desde su sesión). `make deploy`
-   (`scripts/deploy-cloudrun.sh`) crea el servicio `market-hub-playground` en `europe-west1`
-   (1 Gi, hasta 2 instancias, 60 s por petición). No escribe ningún secreto: apunta el servicio a
-   `ANTHROPIC_API_KEY` y a `market-hub-session-secret`, que ya están en Secret Manager, y se niega
-   a desplegar sin `HUB_URL` (sin login, cualquiera gastaría la clave, que no tiene tope). El
-   `.env` local solo lleva `HUB_URL` y `ANTHROPIC_SECRET`, ninguna clave. Después:
-   - mapear el subdominio: `gcloud beta run domain-mappings create --service market-hub-playground
-     --domain playground.themarkethub.app --region europe-west1`, y en Cloudflare un CNAME
-     `playground` a `ghs.googlehosted.com`, solo DNS. **Sin el subdominio no se puede entrar**: la
-     cookie de sesión del portal solo llega a `*.themarkethub.app`, y en la dirección `*.run.app`
-     el servicio manda una y otra vez a iniciar sesión;
-   - el enlace "Playground" en `App.astro` del portal y en los `HubNav.astro` de
-     `fundamentals-lab` y `decision-signal-lab`;
-   - **decir en `/privacy/` del portal que lo que se escribe en el chat va a Anthropic**, antes de
-     enlazarlo desde My Hub.
-4. Registrar el repo como submódulo del workspace `market-hub` y añadirlo a su `CLAUDE.md`.
+3. ~~Desplegar~~ (hecho: ver arriba). Cuando el certificado esté emitido, que el usuario entre
+   en https://playground.themarkethub.app y pruebe el chat. Volver a desplegar para que la barra
+   lateral lleve "Peers".
+4. ~~Registrar el repo como submódulo del workspace~~ (hecho, con su fila en el `CLAUDE.md`).
