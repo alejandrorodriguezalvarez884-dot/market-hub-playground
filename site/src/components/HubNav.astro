@@ -1,0 +1,171 @@
+---
+// The tool is a section of My Hub, the private area of Market Hub, and is only reached from
+// there: it carries the same navigation as the portal's own private pages (App.astro in
+// market-hub-landing; a copy of the HubNav.astro of fundamentals-lab, with Playground marked).
+// `part` is the sidebar of a wide screen or the bar of a narrow one.
+import { FUNDAMENTALS_URL, HUB_URL, RADAR_URL, link } from "../lib/site";
+
+interface Props {
+	part: "side" | "top";
+	class?: string;
+}
+const { part, class: extra } = Astro.props;
+const icons: Record<string, string> = {
+	overview: "M3 13h6V3H3v10Zm0 8h6v-6H3v6Zm8 0h10V11H11v10Zm0-18v6h10V3H11Z",
+	portfolio: "M4 7h16v12H4zM9 7V5h6v2",
+	analysis: "M12 3a9 9 0 1 0 9 9h-9V3Zm3 .5A9 9 0 0 1 20.5 9H15V3.5Z",
+	watchlist: "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+	community: "M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 20a6 6 0 0 1 12 0m1.5-5.5A6 6 0 0 1 22 20",
+	tools: "M4 19V9m6 10V5m6 14v-7m4 7H2",
+	account: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0",
+	markets: "M3 17l6-6 4 4 8-8M15 7h6v6",
+	earnings: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7",
+	news: "M4 5h13v14H6a2 2 0 0 1-2-2V5Zm13 4h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5",
+	opinion: "M4 5h16v11H9l-5 4V5Zm4 4h8M8 12h5",
+	media: "M3 6h18v12H3zM10 9.5v5l4.5-2.5-4.5-2.5Z",
+	playground: "M4 4h7v9H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 15h7v5H4z",
+};
+const groups = [
+	{ label: "Your space", links: [
+		{ href: `${HUB_URL}/dashboard/`, label: "Overview", icon: "overview" },
+		{ href: `${HUB_URL}/analysis/`, label: "Analysis", icon: "analysis" },
+		{ href: `${HUB_URL}/watchlist/`, label: "Watchlist", icon: "watchlist" },
+		{ href: `${HUB_URL}/community/`, label: "Community", icon: "community" },
+		{ href: `${HUB_URL}/portfolio/`, label: "Portfolio", icon: "portfolio" },
+		{ href: `${HUB_URL}/account/`, label: "Account and data", icon: "account" },
+	] },
+	{ label: "Tools", links: [
+		{ href: `${FUNDAMENTALS_URL}/`, label: "Fundamentals", icon: "tools" },
+		{ href: `${RADAR_URL}/`, label: "Earnings", icon: "earnings" },
+		{ href: link("/"), label: "Playground", icon: "playground", active: true },
+	] },
+	{ label: "Explore", links: [
+		{ href: `${HUB_URL}/markets/`, label: "Markets", icon: "markets" },
+		{ href: `${HUB_URL}/news/`, label: "News", icon: "news" },
+		{ href: `${HUB_URL}/opinion/`, label: "Opinion", icon: "opinion" },
+		{ href: `${HUB_URL}/media/`, label: "Media", icon: "media" },
+	] },
+] as { label: string; links: { href: string; label: string; icon: string; active?: boolean }[] }[];
+const brand = "flex flex-none items-center gap-2.5 whitespace-nowrap text-[15px] font-semibold tracking-tight text-ink-strong";
+---
+
+{part === "side" ? (
+	<aside class:list={["sticky top-0 hidden h-screen w-60 flex-none flex-col border-r border-line bg-deep lg:flex", extra]}>
+		<div class="flex h-14 items-center border-b border-line px-4">
+			<a href={`${HUB_URL}/dashboard/`} class={brand}>
+				<svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+					<path d="M4 2v16M4 10h8"></path><circle cx="14.5" cy="10" r="2.75" fill="currentColor" stroke="none"></circle>
+				</svg>
+				<span>Market Hub</span>
+				<span class="text-[12.5px] font-normal text-muted">My Hub</span>
+			</a>
+		</div>
+		<div class="mx-3 mt-4 flex items-center gap-2 rounded-md border border-line bg-panel px-3 py-2 text-[11px] text-muted">
+			<svg class="h-3.5 w-3.5 flex-none text-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+			<span>Private area. Only you see it.</span>
+		</div>
+		<nav class="mt-4 flex-1 overflow-y-auto px-3" aria-label="My Hub">
+			{groups.map((g, i) => (
+				<>
+					<p class:list={["label px-2 pb-1.5", i ? "mt-6" : ""]}>{g.label}</p>
+					<ul class="space-y-0.5">
+						{g.links.map((l) => (
+							<li>
+								<a href={l.href} aria-current={l.active ? "true" : undefined}
+									class:list={["flex items-center gap-2.5 rounded px-2 py-2 text-[13px] transition-colors", l.active ? "bg-raised font-semibold text-ink-strong" : i ? "font-medium text-muted hover:bg-raised hover:text-ink" : "font-semibold text-ink hover:bg-raised"]}>
+									<svg class="h-4 w-4 flex-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icons[l.icon]}></path></svg>
+									{l.label}
+								</a>
+							</li>
+						))}
+					</ul>
+				</>
+			))}
+		</nav>
+		<div class="px-3 pb-3"><a href={`${HUB_URL}/`} class="btn btn-ghost w-full py-1.5 text-[13px]"><span aria-hidden="true">←</span> Back to the home page</a></div>
+		<div data-hub-user="side" class="border-t border-line p-3"></div>
+	</aside>
+) : (
+	<header class:list={["border-b border-line bg-deep lg:hidden", extra]}>
+		<div class="flex h-14 items-center justify-between gap-3 px-4">
+			<a href={`${HUB_URL}/dashboard/`} class={brand}>
+				<svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+					<path d="M4 2v16M4 10h8"></path><circle cx="14.5" cy="10" r="2.75" fill="currentColor" stroke="none"></circle>
+				</svg>
+				<span>Market Hub</span>
+				<span class="text-[12.5px] font-normal text-muted">My Hub</span>
+			</a>
+			<div data-hub-user="top"></div>
+		</div>
+		<nav class="border-t border-line" aria-label="My Hub">
+			<ul class="flex gap-1 overflow-x-auto px-2 text-[13px] font-semibold [scrollbar-width:none]">
+				<li><a href={`${HUB_URL}/`} class="block whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-muted"><span aria-hidden="true">←</span> Home</a></li>
+				{groups.flatMap((g) => g.links).filter((l) => !["Account and data", "News", "Opinion", "Media"].includes(l.label)).map((l) => (
+					<li>
+						<a href={l.href} aria-current={l.active ? "true" : undefined}
+							class:list={["block whitespace-nowrap border-b-2 px-3 py-2", l.active ? "border-accent text-ink-strong" : "border-transparent text-muted"]}>{l.label}</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+	</header>
+)}
+
+<script>
+	import { API, HUB_URL } from "../lib/site";
+
+	type Me = { user: { name: string; email: string; picture: string } | null; hub: string | null };
+
+	// A session that ends while a page is open: the API answers 401 with the hub's sign-in
+	// address, and the visitor goes there (and comes back after signing in).
+	const plainFetch = window.fetch.bind(window);
+	window.fetch = async (...args: Parameters<typeof fetch>) => {
+		const res = await plainFetch(...args);
+		if (res.status === 401)
+			res.clone().json().then((b: { signin?: string }) => b?.signin && location.assign(b.signin)).catch(() => {});
+		return res;
+	};
+
+	function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text?: string) {
+		const e = document.createElement(tag);
+		e.className = cls;
+		if (text !== undefined) e.textContent = text;
+		return e;
+	}
+
+	function avatar(user: NonNullable<Me["user"]>, account: string) {
+		const pic = el("a", "flex h-8 w-8 flex-none items-center justify-center overflow-hidden rounded-full bg-raised text-sm font-medium text-ink-strong ring-2 ring-transparent hover:ring-line-strong");
+		pic.href = account;
+		pic.title = `${user.name} · ${user.email}`;
+		const initial = user.name.charAt(0).toUpperCase();
+		if (user.picture) {
+			const img = el("img", "h-full w-full object-cover");
+			img.src = user.picture;
+			img.alt = "";
+			img.referrerPolicy = "no-referrer";
+			img.onerror = () => pic.replaceChildren(initial);
+			pic.append(img);
+		} else pic.textContent = initial;
+		return pic;
+	}
+
+	// Who is signed in, as the portal's private pages show it. Signing out is done in the portal.
+	plainFetch(`${API}/api/me`, { credentials: "include" })
+		.then((r) => (r.ok ? (r.json() as Promise<Me>) : null))
+		.then((me) => {
+			if (!me?.user) return;
+			const account = `${me.hub ?? HUB_URL}/account/`;
+			for (const box of document.querySelectorAll<HTMLElement>("[data-hub-user]")) {
+				if (box.dataset.hubUser === "top") {
+					box.replaceChildren(avatar(me.user, account));
+					continue;
+				}
+				const who = el("div", "min-w-0 flex-1");
+				who.append(el("div", "truncate text-[13px] font-semibold text-ink-strong", me.user.name), el("div", "truncate text-[11px] text-muted", me.user.email));
+				const row = el("div", "flex items-center gap-2.5");
+				row.append(avatar(me.user, account), who);
+				box.replaceChildren(row);
+			}
+		})
+		.catch(() => {});
+</script>

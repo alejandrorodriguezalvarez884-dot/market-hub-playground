@@ -1,0 +1,583 @@
+@import "tailwindcss";
+
+/* A printed market sheet on a dark page. The interface is one colour (warm white on near-black)
+   and has no boxes: sections sit on the page under a hairline rule. Green and red mean a move and
+   nothing else, so the only colour on a page is the market's. Colours are tokens: bg-page,
+   text-muted, border-line, text-up... */
+@theme {
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --color-page: #0b0c0d;
+  --color-deep: #070808;
+  --color-panel: #101213;
+  --color-raised: #191b1d;
+  --color-line: #222528;
+  --color-line-strong: #3a3e42;
+  --color-ink: #c9c7c1;
+  --color-ink-strong: #f2f0ea;
+  --color-muted: #8c8b86;
+  --color-faint: #5f5f5b;
+  /* No brand colour: what is selected or primary is drawn in the ink itself. */
+  --color-accent: #f2f0ea;
+  --color-accent-strong: #ffffff;
+  --color-accent-soft: rgb(242 240 234 / 0.1);
+  --color-up: #35c98f;
+  --color-up-soft: rgb(53 201 143 / 0.14);
+  --color-down: #ff6b57;
+  --color-down-soft: rgb(255 107 87 / 0.14);
+  --color-warn: #e0b341;
+  --color-warn-soft: rgb(224 179 65 / 0.12);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  ::selection {
+    background: var(--color-ink-strong);
+    color: var(--color-page);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink-strong);
+    outline-offset: 2px;
+  }
+  * {
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  kbd {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  /* A section of a page: a rule, a title, the content. No box around it. */
+  .sec {
+    min-width: 0;
+    border-top: 1px solid var(--color-line-strong);
+    padding-top: 14px;
+  }
+  .sec-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+    margin-bottom: 12px;
+  }
+  .sec-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink-strong);
+  }
+  .sec-note {
+    font-size: 13px;
+    color: var(--color-muted);
+  }
+
+  /* The opening sentence of the home page: the market in words, with its figures. */
+  .lede {
+    max-width: 25em;
+    font-size: clamp(1.55rem, 1rem + 2.2vw, 2.6rem);
+    font-weight: 500;
+    line-height: 1.16;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    text-wrap: pretty;
+  }
+  .lede .fig {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    color: var(--color-ink-strong);
+    white-space: nowrap;
+  }
+  .lede button.fig {
+    cursor: pointer;
+    text-decoration: underline dotted var(--color-faint) 1px;
+    text-underline-offset: 0.18em;
+  }
+  .lede button.fig:hover {
+    text-decoration-style: solid;
+    text-decoration-color: currentColor;
+  }
+  .lede .up {
+    color: var(--color-up);
+  }
+  .lede .down {
+    color: var(--color-down);
+  }
+
+  /* The ruler: every move of the day on one scale. Zero in the middle, falls to the left, rises to
+     the right, the length is the size of the move. */
+  .ruler {
+    --track: 132px;
+  }
+  .ruler-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto var(--track) 4.6rem;
+    align-items: center;
+    column-gap: 14px;
+    padding: 5px 6px;
+    margin: 0 -6px;
+    width: calc(100% + 12px);
+    border-radius: 2px;
+    text-align: left;
+    font-size: 14px;
+  }
+  a.ruler-row:hover,
+  button.ruler-row:hover {
+    background: var(--color-raised);
+  }
+  .ruler-row[aria-pressed="true"] {
+    background: var(--color-raised);
+    box-shadow: inset 2px 0 0 var(--color-ink-strong);
+  }
+  .ruler-group {
+    padding: 14px 0 4px;
+    font-size: 12.5px;
+    color: var(--color-muted);
+  }
+  .ruler-group:first-child {
+    padding-top: 0;
+  }
+  .track {
+    position: relative;
+    height: 18px;
+    width: var(--track, 132px);
+  }
+  .track::before {
+    /* the scale */
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto 0;
+    height: 1px;
+    background: var(--color-line);
+  }
+  .track::after {
+    /* zero */
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 3px;
+    bottom: 3px;
+    width: 1px;
+    background: var(--color-line-strong);
+  }
+  .track-stem {
+    position: absolute;
+    top: calc(50% - 1px);
+    height: 2px;
+    z-index: 1;
+  }
+  .track-dot {
+    position: absolute;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+  /* A move beyond the scale: the mark stops at the edge and is drawn hollow. */
+  .track-dot.off {
+    background: var(--color-page) !important;
+    border: 2px solid currentColor;
+    width: 9px;
+    height: 9px;
+  }
+  .ruler-axis {
+    display: flex;
+    justify-content: space-between;
+    width: var(--track, 132px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-faint);
+  }
+  @media (max-width: 639px) {
+    .ruler {
+      --track: 84px !important;
+    }
+    .ruler-row {
+      grid-template-columns: minmax(0, 1fr) var(--track) 4.4rem;
+      column-gap: 10px;
+    }
+  }
+
+  /* Kept for the private area: an outlined block with a head. */
+  .panel {
+    min-width: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink-strong);
+  }
+  .label {
+    font-size: 12.5px;
+    color: var(--color-muted);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .up {
+    color: var(--color-up);
+  }
+  .down {
+    color: var(--color-down);
+  }
+  .link {
+    color: var(--color-ink-strong);
+    text-decoration: underline var(--color-line-strong) 1px;
+    text-underline-offset: 4px;
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 3px;
+    padding: 7px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+  }
+  .btn-primary {
+    background: var(--color-ink-strong);
+    color: var(--color-page);
+  }
+  .btn-primary:hover {
+    background: var(--color-accent-strong);
+  }
+  .btn-ghost {
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-ink);
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-muted);
+    color: var(--color-ink-strong);
+  }
+  .btn-danger {
+    background: var(--color-down);
+    color: var(--color-page);
+  }
+  .btn-danger:hover {
+    filter: brightness(1.1);
+  }
+  /* Tabs: ranges, categories, movers. Plain words; the chosen one is underlined. */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+  }
+  .tab-btn {
+    padding: 3px 0;
+    font-size: 13px;
+    color: var(--color-muted);
+    border-bottom: 1px solid transparent;
+  }
+  .tab-btn:hover {
+    color: var(--color-ink-strong);
+  }
+  .tab-btn[aria-selected="true"] {
+    color: var(--color-ink-strong);
+    border-bottom-color: var(--color-ink-strong);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 2px;
+    border: 1px solid var(--color-line-strong);
+    padding: 0 5px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--color-ink);
+  }
+  a.chip:hover {
+    border-color: var(--color-muted);
+    color: var(--color-ink-strong);
+  }
+  .pill-up,
+  .pill-down {
+    display: inline-block;
+    min-width: 64px;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .pill-up {
+    color: var(--color-up);
+  }
+  .pill-down {
+    color: var(--color-down);
+  }
+  .data-table {
+    width: 100%;
+    font-size: 14px;
+  }
+  .data-table th,
+  .data-table td {
+    padding: 8px 12px;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .data-table td {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .data-table th:first-child,
+  .data-table td:first-child {
+    text-align: left;
+    padding-left: 0;
+    position: sticky;
+    left: 0;
+    background: var(--color-page);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .data-table th:last-child,
+  .data-table td:last-child {
+    padding-right: 0;
+  }
+  .panel .data-table th:first-child,
+  .panel .data-table td:first-child {
+    padding-left: 16px;
+  }
+  .panel .data-table th:last-child,
+  .panel .data-table td:last-child {
+    padding-right: 16px;
+  }
+  .data-table thead th {
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--color-muted);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .data-table tbody tr + tr td {
+    border-top: 1px solid var(--color-line);
+  }
+  .data-table tbody tr:hover td {
+    background: var(--color-raised);
+  }
+  .row-link {
+    cursor: pointer;
+  }
+  .field {
+    width: 100%;
+    border-radius: 3px;
+    border: 1px solid var(--color-line-strong);
+    background: transparent;
+    padding: 6px 10px;
+    font-size: 14px;
+    color: var(--color-ink-strong);
+    font-variant-numeric: tabular-nums;
+  }
+  .field::placeholder {
+    color: var(--color-faint);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-ink-strong);
+  }
+  .skeleton {
+    border-radius: 2px;
+    background: var(--color-raised);
+    animation: breathe 1.6s infinite ease-in-out;
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Playground: the board's widgets and the chat that composes it. */
+@layer components {
+  /* What a widget can be set to by hand: quiet until the widget is under the pointer or holds the focus. */
+  .widget-tools {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 1px;
+    color: var(--color-faint);
+    transition: color 0.15s;
+  }
+  .widget:hover .widget-tools,
+  .widget:focus-within .widget-tools {
+    color: var(--color-muted);
+  }
+  .tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 5px;
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+  .tool-btn:hover:not(:disabled) {
+    background: var(--color-raised);
+    color: var(--color-ink-strong);
+  }
+  .tool-btn[aria-pressed="true"] {
+    color: var(--color-ink-strong);
+  }
+  .tool-btn:disabled {
+    opacity: 0.35;
+  }
+  /* A widget's ruler shows each price only where the widget is wide enough for it. */
+  .widget {
+    container-type: inline-size;
+  }
+  .widget .ruler-row {
+    grid-template-columns: minmax(0, 1fr) var(--track) 4.6rem;
+  }
+  .widget .ruler-value {
+    display: none;
+  }
+  @container (min-width: 30rem) {
+    .widget .ruler-row {
+      grid-template-columns: minmax(0, 1fr) auto var(--track) 4.6rem;
+    }
+    .widget .ruler-value {
+      display: block;
+    }
+  }
+  /* A widget the chat has just made or changed. */
+  .widget-new {
+    animation: arrive 0.45s ease-out;
+  }
+
+  .suggest {
+    display: flex;
+    width: 100%;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 14px;
+    color: var(--color-ink);
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .suggest:hover {
+    border-color: var(--color-line-strong);
+    background: var(--color-raised);
+    color: var(--color-ink-strong);
+  }
+
+  /* The chat: a bar at the foot of a narrow window, a column beside the board on a wide one. */
+  .chat {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-line-strong);
+    background: var(--color-deep);
+  }
+  .chat-log {
+    display: flex;
+    min-height: 0;
+    max-height: 6.5rem; /* the last exchange, on a narrow window */
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    padding: 12px 12px 0;
+    font-size: 14px;
+  }
+  .chat-log:empty {
+    display: none;
+  }
+  .chat-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-muted);
+    animation: breathe 1.2s infinite ease-in-out;
+  }
+  .chat-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .chat-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  @media (min-width: 1024px) {
+    .chat {
+      left: 15rem; /* beside My Hub's navigation */
+    }
+  }
+  @media (min-width: 1280px) {
+    .chat {
+      position: sticky;
+      inset: 0 auto auto auto;
+      align-self: flex-start;
+      width: 380px;
+      height: 100vh;
+      flex: none;
+      border-top: 0;
+      border-left: 1px solid var(--color-line);
+    }
+    .chat-log {
+      flex: 1;
+      max-height: none;
+      padding: 16px 16px 0;
+    }
+    .chat-log:empty {
+      display: flex;
+    }
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .widget-new,
+  .chat-dot {
+    animation: none;
+  }
+}

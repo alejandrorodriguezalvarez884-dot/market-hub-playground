@@ -1,0 +1,105 @@
+---
+// The one page of the tool: the board and, beside it (under it on a narrow screen), the chat that
+// composes it. It is a section of My Hub, so it carries the portal's private navigation.
+import HubNav from "../components/HubNav.astro";
+import Layout from "../layouts/Layout.astro";
+import { SITE_NAME } from "../lib/site";
+
+const suggestions = [
+	"Chart Nvidia over two years with its 50 and 200-day averages",
+	"Compare Apple, Microsoft and Alphabet this year",
+	"The eleven US sectors on one scale, over one month",
+	"A table of the big banks with returns, volatility and P/E",
+];
+const kinds = [
+	["Price", "one instrument, candles or a line, with its averages"],
+	["Compare", "several, as lines from the same start"],
+	["One scale", "many, each a mark at its move"],
+	["Table", "rows of tickers, the figures you choose"],
+];
+---
+
+<Layout title={`${SITE_NAME} — Market Hub`} description="A board of market charts and tables that you compose by asking for them.">
+	<div class="lg:flex">
+		<HubNav part="side" />
+		<div class="min-w-0 flex-1">
+			<HubNav part="top" />
+			<div class="xl:flex">
+				<main class="min-w-0 flex-1 px-5 pb-60 pt-6 lg:px-8 lg:pt-8 xl:pb-16">
+					<header class="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 pb-7">
+						<div>
+							<h1 class="text-2xl font-semibold tracking-tight text-ink-strong">
+								{SITE_NAME}
+								<span id="sample" class="ml-2 rounded-sm bg-warn-soft px-1.5 py-0.5 align-middle text-[11px] font-normal tracking-normal text-warn" hidden>sample figures</span>
+							</h1>
+							<p class="mt-1 text-sm text-muted">A board of your own. Ask for what you want to see, then arrange it as you like.</p>
+						</div>
+						<button id="clear" type="button" class="btn btn-ghost py-1 text-[13px]" hidden>Clear the board</button>
+					</header>
+
+					<section id="empty" class="sec pt-6">
+						<p class="lede !max-w-[20em] !text-[clamp(1.35rem,1rem+1.3vw,2rem)]">The board is empty. Say what you want to see.</p>
+						<ul class="mt-7 grid max-w-3xl gap-2 sm:grid-cols-2">
+							{suggestions.map((s) => (
+								<li><button type="button" class="suggest" data-suggest={s}><span>{s}</span><span aria-hidden="true" class="text-faint">→</span></button></li>
+							))}
+						</ul>
+						<p id="failed" class="mt-6 text-sm text-warn" hidden></p>
+					</section>
+
+					<div class="@container">
+						<div id="board" class="grid grid-cols-12 gap-x-8 gap-y-10"></div>
+					</div>
+
+					<p class="mt-14 border-t border-line pt-5 text-xs leading-relaxed text-muted">
+						Prices from the data provider, possibly delayed. Returns are those of the price, without dividends.
+						Nothing here is investment advice or a recommendation to buy or sell any security.
+						A board is not saved: it lasts while this page is open.
+						<span id="credit"></span>
+					</p>
+				</main>
+
+				<aside class="chat" aria-label="Ask for a view">
+					<div class="hidden flex-none border-b border-line px-4 py-4 xl:block">
+						<h2 class="text-sm font-semibold text-ink-strong">What do you want to see?</h2>
+						<dl class="mt-3 space-y-1.5 text-[12.5px]">
+							{kinds.map(([name, what]) => (
+								<div class="flex gap-2"><dt class="w-[4.6rem] flex-none text-ink">{name}</dt><dd class="text-muted">{what}</dd></div>
+							))}
+						</dl>
+					</div>
+					<div id="chat" class="flex min-h-0 flex-1 flex-col"></div>
+				</aside>
+			</div>
+		</div>
+	</div>
+</Layout>
+
+<script>
+	import { catalog } from "../lib/api";
+	import { createBoard } from "../lib/board";
+	import { chartCredit } from "../lib/charts";
+	import { createChat } from "../lib/chat";
+
+	const el = (id: string) => document.getElementById(id)!;
+	const empty = el("empty"), clear = el("clear");
+	el("credit").replaceWith(chartCredit());
+
+	catalog()
+		.then((cat) => {
+			el("sample").hidden = !cat.sample;
+			const board = createBoard(el("board"), cat, (widgets) => {
+				empty.hidden = widgets.length > 0;
+				clear.hidden = widgets.length === 0;
+			});
+			const chat = createChat(el("chat"), { board: board.get, apply: (out) => board.set(out.board, out.changed), limit: cat.limits.message });
+			clear.addEventListener("click", () => board.set([]));
+			for (const b of document.querySelectorAll<HTMLButtonElement>("[data-suggest]"))
+				b.addEventListener("click", () => chat.send(b.dataset.suggest!));
+		})
+		.catch((e) => {
+			const failed = el("failed");
+			failed.textContent = e instanceof Error ? e.message : "Something failed. Try again in a moment.";
+			failed.hidden = false;
+		});
+</script>

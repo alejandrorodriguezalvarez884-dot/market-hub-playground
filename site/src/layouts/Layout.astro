@@ -1,0 +1,50 @@
+---
+import "../styles/global.css";
+import { link } from "../lib/site";
+
+interface Props {
+	title: string;
+	description: string;
+}
+const { title, description } = Astro.props;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : null;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href={link("/favicon.svg")} />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="color-scheme" content="dark" />
+		<meta name="theme-color" content="#0b0c0d" />
+		<meta name="description" content={description} />
+		{canonical && <link rel="canonical" href={canonical} />}
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		{canonical && <meta property="og:url" content={canonical} />}
+		<title>{title}</title>
+		<script is:inline>
+			// Visits are counted by Cloudflare Web Analytics, which sets no cookie, under Market Hub's
+			// site (one token for the whole domain). On the public domain only: a local preview counts
+			// nothing.
+			if (/(^|\.)themarkethub\.app$/.test(location.hostname)) {
+				const beacon = document.createElement("script");
+				beacon.type = "module";
+				beacon.src = "https://static.cloudflareinsights.com/beacon.min.js";
+				beacon.dataset.cfBeacon = JSON.stringify({ token: "592b6306f5104483a0a6877de93785b5" });
+				document.head.append(beacon);
+			}
+		</script>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body class="min-h-screen bg-page text-ink antialiased">
+		<slot />
+	</body>
+</html>
