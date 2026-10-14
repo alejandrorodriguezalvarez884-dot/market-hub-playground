@@ -8,6 +8,7 @@ export const HUB_URL = site(import.meta.env.PUBLIC_HUB_URL, "https://themarkethu
 export const RADAR_URL = site(import.meta.env.PUBLIC_RADAR_URL, "https://radar.themarkethub.app");
 export const FUNDAMENTALS_URL = site(import.meta.env.PUBLIC_FUNDAMENTALS_URL, "https://fundamentals.themarkethub.app");
 export const PEERS_URL = site(import.meta.env.PUBLIC_PEERS_URL, "https://peers.themarkethub.app");
+export const OPTIONS_URL = site(import.meta.env.PUBLIC_OPTIONS_URL, "https://options.themarkethub.app");
 export const hubQuoteUrl = (ticker: string) => `${HUB_URL}/quote/?t=${encodeURIComponent(ticker)}`;
 
 // Every internal link goes through here, so the site works under a sub-path too.

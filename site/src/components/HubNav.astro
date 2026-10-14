@@ -3,7 +3,7 @@
 // there: it carries the same navigation as the portal's own private pages (App.astro in
 // market-hub-landing; a copy of the HubNav.astro of fundamentals-lab, with Playground marked).
 // `part` is the sidebar of a wide screen or the bar of a narrow one.
-import { FUNDAMENTALS_URL, HUB_URL, PEERS_URL, RADAR_URL, link } from "../lib/site";
+import { FUNDAMENTALS_URL, HUB_URL, OPTIONS_URL, PEERS_URL, RADAR_URL, link } from "../lib/site";
 
 interface Props {
 	part: "side" | "top";
@@ -25,6 +25,7 @@ const icons: Record<string, string> = {
 	opinion: "M4 5h16v11H9l-5 4V5Zm4 4h8M8 12h5",
 	media: "M3 6h18v12H3zM10 9.5v5l4.5-2.5-4.5-2.5Z",
 	playground: "M4 4h7v9H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 15h7v5H4z",
+	options: "M3 20h18M3 15h7l10-10",
 };
 const groups = [
 	{ label: "Your space", links: [
@@ -40,6 +41,7 @@ const groups = [
 		{ href: `${RADAR_URL}/`, label: "Earnings", icon: "earnings" },
 		{ href: `${PEERS_URL}/`, label: "Peers", icon: "peers" },
 		{ href: link("/"), label: "Playground", icon: "playground", active: true },
+		{ href: `${OPTIONS_URL}/`, label: "Options", icon: "options" },
 	] },
 	{ label: "Explore", links: [
 		{ href: `${HUB_URL}/markets/`, label: "Markets", icon: "markets" },

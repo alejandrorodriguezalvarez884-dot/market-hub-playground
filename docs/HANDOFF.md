@@ -34,6 +34,11 @@ Decisiones del agente, avisadas al usuario y a revisar si quiere otras:
 
 ## Dónde estamos
 
+> 2026-10-14: **Options en la barra de My Hub** (sin desplegar). "Tools" de la barra lateral lleva
+> una herramienta más, **Options** (Options Lab, https://options.themarkethub.app, repo
+> `market-hub-options`): cadenas de opciones leídas con detalle y estrategias. **No desplegar
+> hasta que ese subdominio responda por HTTPS**: hasta entonces el enlace no abre.
+
 **Hecho, probado con el modelo de verdad y desplegado (2026-10-08).**
 
 - **Desplegado el 2026-10-08 a petición del usuario, para probarlo**: servicio
