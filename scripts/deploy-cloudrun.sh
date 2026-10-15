@@ -11,7 +11,7 @@
 # HUB_URL is required: the chat spends with the owner's key and has no spending cap of its own,
 # so the service is never deployed open to everybody.
 #
-# Optional overrides: GCP_PROJECT, GCP_REGION, SERVICE_NAME, MAX_INSTANCES, and in .env
+# Optional overrides: GCP_PROJECT, GCP_REGION, SERVICE_NAME, MIN_INSTANCES, MAX_INSTANCES, and in .env
 # PLAYGROUND_MODEL and PLAYGROUND_EFFORT.
 set -euo pipefail
 
@@ -27,6 +27,8 @@ command -v gcloud >/dev/null || fail "gcloud is not installed."
 GCP_PROJECT="${GCP_PROJECT:-$(gcloud config get-value project 2>/dev/null || true)}"
 GCP_REGION="${GCP_REGION:-europe-west1}"
 SERVICE_NAME="${SERVICE_NAME:-market-hub-playground}"
+# One instance stays warm so nobody waits for a cold start.
+MIN_INSTANCES="${MIN_INSTANCES:-1}"
 MAX_INSTANCES="${MAX_INSTANCES:-2}"
 ENV_FILE=".env"
 
@@ -92,7 +94,7 @@ gcp run deploy "$SERVICE_NAME" \
   --port 8080 \
   --cpu 1 \
   --memory 1Gi \
-  --min-instances 0 \
+  --min-instances "$MIN_INSTANCES" \
   --max-instances "$MAX_INSTANCES" \
   --timeout 60 \
   --set-secrets "$SECRETS" \

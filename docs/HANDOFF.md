@@ -34,6 +34,12 @@ Decisiones del agente, avisadas al usuario y a revisar si quiere otras:
 
 ## Dónde estamos
 
+> 2026-10-15: **Una instancia siempre encendida.** Para el lanzamiento, por decisión del usuario,
+> `market-hub-playground` tiene `--min-instances 1` (revisión `market-hub-playground-00004-hpv`, hecha con `gcloud run services update`,
+> sin reconstruir): nadie espera un arranque en frío y las cachés en memoria duran. Cuesta
+> tener la instancia parada pero viva todo el mes. `scripts/deploy-cloudrun.sh` lo fija con
+> `MIN_INSTANCES` (1 por defecto; `MIN_INSTANCES=0 make deploy` vuelve a escalar a cero).
+
 > 2026-10-14: **Options en la barra de My Hub** (desplegado como `market-hub-playground-00002-r5c`, con la configuración del servicio idéntica). "Tools" de la barra lateral lleva
 > una herramienta más, **Options** (Options Lab, https://options.themarkethub.app, repo
 > `market-hub-options`): cadenas de opciones leídas con detalle y estrategias. Desplegado cuando ese
