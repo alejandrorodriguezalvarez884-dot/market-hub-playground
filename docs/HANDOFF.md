@@ -34,6 +34,11 @@ Decisiones del agente, avisadas al usuario y a revisar si quiere otras:
 
 ## Dónde estamos
 
+> 2026-10-17: **De vuelta a escalar a cero.** Por decisión del usuario, `market-hub-playground` vuelve a
+> `--min-instances 0` (revisión `market-hub-playground-00005-wct`, hecha con `gcloud run services update`, sin
+> reconstruir), y `scripts/deploy-cloudrun.sh` pone 0 por defecto (`MIN_INSTANCES=1 make deploy`
+> deja una instancia encendida). La nota de abajo queda como historia.
+
 > 2026-10-15: **Una instancia siempre encendida.** Para el lanzamiento, por decisión del usuario,
 > `market-hub-playground` tiene `--min-instances 1` (revisión `market-hub-playground-00004-hpv`, hecha con `gcloud run services update`,
 > sin reconstruir): nadie espera un arranque en frío y las cachés en memoria duran. Cuesta
